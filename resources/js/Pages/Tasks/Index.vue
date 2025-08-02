@@ -20,7 +20,11 @@
                     <div v-for="task in tasks" :key="task.id" class="bg-white p-4 shadow rounded">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h3 class="text-lg font-bold">{{ task.title }}</h3>
+                                <h3 class="text-lg font-bold">
+                                    <Link :href="`/tasks/${task.id}`" class="text-indigo-700 hover:underline">
+                                        {{ task.title }}
+                                    </Link>
+                                </h3>
                                 <p class="text-sm text-gray-600">{{ task.status }}</p>
                             </div>
                             <div class="space-x-2">

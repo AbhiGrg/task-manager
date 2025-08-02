@@ -5,6 +5,9 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\TaskTimelineController;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -26,13 +29,19 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', fn () => Inertia::render('Admin/Dashboard'));
-});
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::post('users/{user}/update-role', [UserManagementController::class, 'update'])->name('users.update-role');
+    });
 
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('tasks', TaskController::class);
+    Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
+    Route::post('/tasks/{task}/timeline', [TaskTimelineController::class, 'store'])->name('tasks.timeline.store');
 });
 
 

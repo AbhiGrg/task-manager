@@ -45,7 +45,13 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Tasks
                                 </NavLink>
-
+                                <NavLink
+                                    v-if="$page.props.auth.roles && $page.props.auth.roles.includes('admin')"
+                                    :href="route('admin.users.index')"
+                                    :active="route().current('admin.users.index')"
+                                    >
+                                    Admin Panel
+                                </NavLink>
                             </div>
                         </div>
 
@@ -159,7 +165,13 @@ const showingNavigationDropdown = ref(false);
                         >
                             Tasks
                         </ResponsiveNavLink>
-
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.roles && $page.props.auth.roles.includes('admin')"
+                            :href="route('admin.users.index')"
+                            :active="route().current('admin.users.index')"
+                            >
+                            Admin Panel
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->

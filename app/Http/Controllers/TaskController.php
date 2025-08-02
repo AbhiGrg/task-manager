@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Task;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Models\TaskTimeline;
 
 class TaskController extends Controller
 {
@@ -15,31 +16,52 @@ class TaskController extends Controller
 
     public function index()
     {
-        $tasks = Task::where('user_id', auth()->id())->latest()->get();
+        $tasks = Task::where('created_by', auth()->id())->latest()->get();
 
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks
         ]);
     }
 
+    public function show(Task $task)
+    {
+        $task->load(['timelines.user', 'assignee', 'creator']);
+
+        return Inertia::render('Tasks/Show', [
+            'task' => $task,
+        ]);
+    }
+
     public function create()
     {
-        return Inertia::render('Tasks/Create');
+        $users = User::all();
+        return Inertia::render('Tasks/Create', [
+            'users' => $users
+        ]);
     }
 
     public function store(Request $request)
     {
-        $validated =  $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:pending,in-progress,completed',
+            'status' => 'required|string',
+            'assigned_to' => 'nullable|exists:users,id',
         ]);
 
-        // dd($validated);
+        $task = Task::create([
+            ...$validated,
+            'created_by' => auth()->id(),
+        ]);
 
-        $request->user()->tasks()->create($validated);
+        // ✅ Create timeline entry
+        TaskTimeline::create([
+            'task_id' => $task->id,
+            'user_id' => auth()->id(),
+            'message' => 'Task created by ' . auth()->user()->name. 'at '.now()->format('Y-m-d H:i'),
+        ]);
 
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index')->with('message', 'Task created successfully.');
     }
 
     public function edit(Task $task)
